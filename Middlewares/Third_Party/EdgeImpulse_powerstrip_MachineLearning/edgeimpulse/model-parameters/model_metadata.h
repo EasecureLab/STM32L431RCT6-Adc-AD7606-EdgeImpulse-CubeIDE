@@ -44,7 +44,7 @@
 #define EI_CLASSIFIER_PROJECT_ID                 41064
 #define EI_CLASSIFIER_PROJECT_OWNER              "davwang"
 #define EI_CLASSIFIER_PROJECT_NAME               "powerstrip"
-#define EI_CLASSIFIER_PROJECT_DEPLOY_VERSION     8
+#define EI_CLASSIFIER_PROJECT_DEPLOY_VERSION     10
 #define EI_CLASSIFIER_NN_INPUT_FRAME_SIZE        895
 #define EI_CLASSIFIER_RAW_SAMPLE_COUNT           894
 #define EI_CLASSIFIER_RAW_SAMPLES_PER_FRAME      1
@@ -52,7 +52,7 @@
 #define EI_CLASSIFIER_INPUT_WIDTH                0
 #define EI_CLASSIFIER_INPUT_HEIGHT               0
 #define EI_CLASSIFIER_INTERVAL_MS                1.11731843575419
-#define EI_CLASSIFIER_LABEL_COUNT                2
+#define EI_CLASSIFIER_LABEL_COUNT                3
 #define EI_CLASSIFIER_HAS_ANOMALY                0
 #define EI_CLASSIFIER_FREQUENCY                  895
 #define EI_CLASSIFIER_USE_QUANTIZED_DSP_BLOCK    0
@@ -64,7 +64,7 @@
 #define EI_CLASSIFIER_TFLITE_ARENA_SIZE          3616
 #define EI_CLASSIFIER_TFLITE_INPUT_DATATYPE      EI_CLASSIFIER_DATATYPE_INT8
 #define EI_CLASSIFIER_TFLITE_INPUT_QUANTIZED     1
-#define EI_CLASSIFIER_TFLITE_INPUT_SCALE         0.0011437254725024104
+#define EI_CLASSIFIER_TFLITE_INPUT_SCALE         0.005753388162702322
 #define EI_CLASSIFIER_TFLITE_INPUT_ZEROPOINT     -128
 #define EI_CLASSIFIER_TFLITE_OUTPUT_DATATYPE     EI_CLASSIFIER_DATATYPE_INT8
 #define EI_CLASSIFIER_TFLITE_OUTPUT_QUANTIZED    1
@@ -90,7 +90,7 @@
 #endif
 #endif // EI_CLASSIFIER_INFERENCING_ENGINE == EI_CLASSIFIER_TFLITE && EI_CLASSIFIER_USE_FULL_TFLITE == 1
 
-const char* ei_classifier_inferencing_categories[] = { "fan1", "off" };
+const char* ei_classifier_inferencing_categories[] = { "display", "fan1", "off" };
 
 typedef struct {
     uint16_t implementation_version;

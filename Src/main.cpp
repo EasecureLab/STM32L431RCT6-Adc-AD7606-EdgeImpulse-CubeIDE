@@ -133,6 +133,7 @@ int main(void)
   printf("Hello Wang.Wei\r\n");
 
   int count=895;
+  int i;
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -141,36 +142,41 @@ int main(void)
   {
     if(count==895)
     {
+    	// inference on edge
 		ei_impulse_result_t result = { 0 };
 		EI_IMPULSE_ERROR res = run_classifier(&signal, &result, true);
-		ei_printf("run_classifier returned: %d\n", res);
+//		ei_printf("run_classifier returned: %d\n", res);
 
-		ei_printf("Predictions (DSP: %d ms., Classification: %d ms., Anomaly: %d ms.): \n",
-		  result.timing.dsp, result.timing.classification, result.timing.anomaly);
+//		ei_printf("Predictions (DSP: %d ms., Classification: %d ms., Anomaly: %d ms.): \n",
+//		          result.timing.dsp, result.timing.classification, result.timing.anomaly);
 
 		// print the predictions
-		ei_printf("[");
-		for (size_t ix = 0; ix < EI_CLASSIFIER_LABEL_COUNT; ix++) {
-		  ei_printf_float(result.classification[ix].value);
-		#if EI_CLASSIFIER_HAS_ANOMALY == 1
-		  ei_printf(", ");
-		#else
-		  if (ix != EI_CLASSIFIER_LABEL_COUNT - 1) {
-			  ei_printf(", ");
-		  }
-		#endif
-		}
-		#if EI_CLASSIFIER_HAS_ANOMALY == 1
-		ei_printf_float(result.anomaly);
-		#endif
-		ei_printf("]\n\n\n");
+//		ei_printf("[");
+//
+//		for (size_t ix = 0; ix < EI_CLASSIFIER_LABEL_COUNT; ix++) {
+//			ei_printf_float(result.classification[ix].value);
+//			#if EI_CLASSIFIER_HAS_ANOMALY == 1
+//				ei_printf(", ");
+//			#else
+//				if (ix != EI_CLASSIFIER_LABEL_COUNT - 1) {
+//					ei_printf(", ");
+//				}
+//			#endif
+//		}
+//
+//		#if EI_CLASSIFIER_HAS_ANOMALY == 1
+//			ei_printf_float(result.anomaly);
+//		#endif
+//			ei_printf("]\n\n\n");
 
-		HAL_Delay(5000);
+		HAL_Delay(3000);
+
 		count=0;
     }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+    //    printf("count=%d\r\n",count);
     if(count !=895)
     {
 		HAL_ADC_Start(&hadc1);
@@ -187,6 +193,8 @@ int main(void)
 		features[count] = Voltage;
 		count++;
     }
+//    for(i=0;i<895;i++)
+//    	printf("%f\t\r\n",features[i]);
   }
   /* USER CODE END 3 */
 }

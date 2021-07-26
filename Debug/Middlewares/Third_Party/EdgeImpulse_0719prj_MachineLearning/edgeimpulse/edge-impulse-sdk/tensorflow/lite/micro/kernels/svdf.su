@@ -1,8 +1,0 @@
-gthr-default.h:229:1:int __gthread_key_delete(__gthread_key_t)	16	static
-kernel_util.h:152:12:int tflite::NumInputs(const TfLiteNode*)	16	static
-kernel_util.h:31:26:TfLiteEvalTensor* tflite::micro::GetMutableEvalInput(const TfLiteContext*, const TfLiteNode*, int)	24	static
-kernel_util.h:40:32:const TfLiteEvalTensor* tflite::micro::GetEvalInput(const TfLiteContext*, const TfLiteNode*, int)	24	static
-kernel_util.h:46:26:TfLiteEvalTensor* tflite::micro::GetEvalOutput(const TfLiteContext*, const TfLiteNode*, int)	24	static
-svdf.cc:521:7:void* tflite::{anonymous}::Init(TfLiteContext*, const char*, size_t)	24	static
-svdf.cc:526:14:TfLiteStatus tflite::{anonymous}::Eval(TfLiteContext*, TfLiteNode*)	80	static
-svdf.cc:573:20:TfLiteRegistration tflite::Register_SVDF()	24	static
