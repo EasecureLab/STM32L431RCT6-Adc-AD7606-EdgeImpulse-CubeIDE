@@ -43,28 +43,28 @@
 
 #define EI_CLASSIFIER_PROJECT_ID                 41064
 #define EI_CLASSIFIER_PROJECT_OWNER              "davwang"
-#define EI_CLASSIFIER_PROJECT_NAME               "0719prj"
-#define EI_CLASSIFIER_PROJECT_DEPLOY_VERSION     1
-#define EI_CLASSIFIER_NN_INPUT_FRAME_SIZE        837
-#define EI_CLASSIFIER_RAW_SAMPLE_COUNT           837
+#define EI_CLASSIFIER_PROJECT_NAME               "powerstrip"
+#define EI_CLASSIFIER_PROJECT_DEPLOY_VERSION     8
+#define EI_CLASSIFIER_NN_INPUT_FRAME_SIZE        895
+#define EI_CLASSIFIER_RAW_SAMPLE_COUNT           894
 #define EI_CLASSIFIER_RAW_SAMPLES_PER_FRAME      1
 #define EI_CLASSIFIER_DSP_INPUT_FRAME_SIZE       (EI_CLASSIFIER_RAW_SAMPLE_COUNT * EI_CLASSIFIER_RAW_SAMPLES_PER_FRAME)
 #define EI_CLASSIFIER_INPUT_WIDTH                0
 #define EI_CLASSIFIER_INPUT_HEIGHT               0
-#define EI_CLASSIFIER_INTERVAL_MS                1.194743130227
+#define EI_CLASSIFIER_INTERVAL_MS                1.11731843575419
 #define EI_CLASSIFIER_LABEL_COUNT                2
 #define EI_CLASSIFIER_HAS_ANOMALY                0
-#define EI_CLASSIFIER_FREQUENCY                  837
+#define EI_CLASSIFIER_FREQUENCY                  895
 #define EI_CLASSIFIER_USE_QUANTIZED_DSP_BLOCK    0
 
 
 #define EI_CLASSIFIER_OBJECT_DETECTION           0
 
 
-#define EI_CLASSIFIER_TFLITE_ARENA_SIZE          3558
+#define EI_CLASSIFIER_TFLITE_ARENA_SIZE          3616
 #define EI_CLASSIFIER_TFLITE_INPUT_DATATYPE      EI_CLASSIFIER_DATATYPE_INT8
 #define EI_CLASSIFIER_TFLITE_INPUT_QUANTIZED     1
-#define EI_CLASSIFIER_TFLITE_INPUT_SCALE         0.010514706373214722
+#define EI_CLASSIFIER_TFLITE_INPUT_SCALE         0.0011437254725024104
 #define EI_CLASSIFIER_TFLITE_INPUT_ZEROPOINT     -128
 #define EI_CLASSIFIER_TFLITE_OUTPUT_DATATYPE     EI_CLASSIFIER_DATATYPE_INT8
 #define EI_CLASSIFIER_TFLITE_OUTPUT_QUANTIZED    1
@@ -90,7 +90,7 @@
 #endif
 #endif // EI_CLASSIFIER_INFERENCING_ENGINE == EI_CLASSIFIER_TFLITE && EI_CLASSIFIER_USE_FULL_TFLITE == 1
 
-const char* ei_classifier_inferencing_categories[] = { "all_off", "laptop_on" };
+const char* ei_classifier_inferencing_categories[] = { "fan1", "off" };
 
 typedef struct {
     uint16_t implementation_version;
@@ -181,9 +181,9 @@ typedef struct {
     bool invert_features;
 } ei_dsp_config_audio_syntiant_t;
 
-uint8_t ei_dsp_config_3_axes[] = { 0 };
-const uint32_t ei_dsp_config_3_axes_size = 1;
-ei_dsp_config_raw_t ei_dsp_config_3 = {
+uint8_t ei_dsp_config_38_axes[] = { 0 };
+const uint32_t ei_dsp_config_38_axes_size = 1;
+ei_dsp_config_raw_t ei_dsp_config_38 = {
     1,
     1,
     1.00000f
