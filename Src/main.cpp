@@ -21,6 +21,7 @@
 #include "main.h"
 #include "adc.h"
 #include "crc.h"
+#include "spi.h"
 #include "usart.h"
 #include "gpio.h"
 
@@ -90,7 +91,52 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+void AD7606_StartConvst(void)
+{
+	HAL_GPIO_WritePin(CO_A_GPIO_Port, CO_A_Pin, GPIO_PIN_RESET); //	CO_A_L;
+	HAL_GPIO_WritePin(CO_B_GPIO_Port, CO_B_Pin, GPIO_PIN_RESET); //	CO_B_L;
+	HAL_Delay(1);
+//	for(int i = 20; i > 0; i--){
+//		__NOP();//1000/168 ns = 5.85ns
+//	}
+	HAL_GPIO_WritePin(CO_A_GPIO_Port, CO_A_Pin, GPIO_PIN_SET); //	CO_A_H;
+	HAL_GPIO_WritePin(CO_B_GPIO_Port, CO_B_Pin, GPIO_PIN_SET); //	CO_B_H;
+	HAL_Delay(1);
+//	for(int i = 20; i > 0; i--){
+//		__NOP();//1000/168 ns = 5.85ns
+//	}
+}
+void AD7606_RESET(void)
+{
+	HAL_GPIO_WritePin(REST_GPIO_Port, REST_Pin, GPIO_PIN_RESET); //REST_L;
+	HAL_Delay(1);
+//	for(int i = 20; i > 0; i--){
+//		__NOP();//1000/168 ns = 5.85ns
+//	}
+	HAL_GPIO_WritePin(REST_GPIO_Port, REST_Pin, GPIO_PIN_SET); //REST_H;
+	HAL_Delay(1);
+//	for(int i = 20; i > 0; i--){
+//		__NOP();//1000/168 ns = 5.85ns
+//	}
+	HAL_GPIO_WritePin(REST_GPIO_Port, REST_Pin, GPIO_PIN_RESET); //REST_L;
+}
+void AD7606_Init(void)
+{
+//	MX_SPI2_Init();
+//	GPIO_AD7606_Configuration();
+	HAL_GPIO_WritePin(CO_A_GPIO_Port, CO_A_Pin, GPIO_PIN_SET); //	CO_A_H;
+	HAL_GPIO_WritePin(CO_B_GPIO_Port, CO_B_Pin, GPIO_PIN_SET); //	CO_B_H;
+	HAL_Delay(1);
+	HAL_GPIO_WritePin(SER_GPIO_Port, SER_Pin, GPIO_PIN_SET); //SER_H;
 
+	AD7606_RESET();
+	HAL_Delay(1);
+	AD7606_StartConvst();
+}
+void AD7606_ReadData(uint16_t * DB_data)
+{
+	HAL_SPI_Receive(&hspi2, (uint8_t *)DB_data, 8, 1000);
+}
 /* USER CODE END 0 */
 
 /**
@@ -103,6 +149,8 @@ int main(void)
   uint16_t ADCvalue;
   float Voltage;
   float Rest;
+  uint8_t dis_buf[40];
+  uint16_t DB_data[8] = {0};
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -128,55 +176,34 @@ int main(void)
   MX_ADC1_Init();
   MX_USART1_UART_Init();
   MX_CRC_Init();
+  MX_SPI2_Init();
   /* USER CODE BEGIN 2 */
   HAL_ADCEx_Calibration_Start(&hadc1,ADC_SINGLE_ENDED);
   printf("Hello Wang.Wei\r\n");
 
   int count=895;
   int i;
+
+  AD7606_Init();
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+
+    /* USER CODE END WHILE */
+
+    /* USER CODE BEGIN 3 */
+// internal adc
     if(count==895)
     {
     	// inference on edge
 		ei_impulse_result_t result = { 0 };
 		EI_IMPULSE_ERROR res = run_classifier(&signal, &result, true);
-//		ei_printf("run_classifier returned: %d\n", res);
-
-//		ei_printf("Predictions (DSP: %d ms., Classification: %d ms., Anomaly: %d ms.): \n",
-//		          result.timing.dsp, result.timing.classification, result.timing.anomaly);
-
-		// print the predictions
-//		ei_printf("[");
-//
-//		for (size_t ix = 0; ix < EI_CLASSIFIER_LABEL_COUNT; ix++) {
-//			ei_printf_float(result.classification[ix].value);
-//			#if EI_CLASSIFIER_HAS_ANOMALY == 1
-//				ei_printf(", ");
-//			#else
-//				if (ix != EI_CLASSIFIER_LABEL_COUNT - 1) {
-//					ei_printf(", ");
-//				}
-//			#endif
-//		}
-//
-//		#if EI_CLASSIFIER_HAS_ANOMALY == 1
-//			ei_printf_float(result.anomaly);
-//		#endif
-//			ei_printf("]\n\n\n");
-
 		HAL_Delay(3000);
-
 		count=0;
     }
-    /* USER CODE END WHILE */
-
-    /* USER CODE BEGIN 3 */
-    //    printf("count=%d\r\n",count);
     if(count !=895)
     {
 		HAL_ADC_Start(&hadc1);
@@ -186,15 +213,23 @@ int main(void)
 			ADCvalue=HAL_ADC_GetValue(&hadc1);
 			Voltage=ADCvalue*3.3/4096;   //2^12=4096
 			Rest = Voltage*10/(3.3-Voltage);
-			//printf("ADCvalue:%d  Voltage:%f  Rest:%f \n",ADCvalue,Voltage,Rest);
-			//HAL_Delay(200);
 			printf("%f\t\r\n",Voltage);
 		}
 		features[count] = Voltage;
 		count++;
     }
-//    for(i=0;i<895;i++)
-//    	printf("%f\t\r\n",features[i]);
+// external adc chip
+//	AD7606_StartConvst();
+//	while((HAL_GPIO_ReadPin(GPIOA,BUSY_Pin) == GPIO_PIN_SET))	//
+//		HAL_Delay(10);
+//	AD7606_ReadData(DB_data);
+//	for(i=0;i<8;i++)
+//	{
+//		sprintf((char*)dis_buf,"CH%1d:%8.1f mv  0x%04x %6d\r\n", i+1, (float)(DB_data[i]*10000.0/32768), (uint16_t)(DB_data[i]^0x8000), (uint16_t)(DB_data[i]^0x8000));
+//	    printf("%s",dis_buf);
+//	}
+//	HAL_Delay(1000);
+
   }
   /* USER CODE END 3 */
 }
@@ -293,7 +328,7 @@ void assert_failed(uint8_t *file, uint32_t line)
 {
   /* USER CODE BEGIN 6 */
   /* User can add his own implementation to report the file name and line number,
-     tex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+     ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */
