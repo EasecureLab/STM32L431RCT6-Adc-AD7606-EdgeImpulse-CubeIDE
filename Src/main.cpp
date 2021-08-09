@@ -91,8 +91,11 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-// 硬件连接：
-//							AD7606模块							STM32L431核心板
+// ????:
+//??ADC
+// 								Analog 			 -------> 			PA1
+//??ADC
+//							AD7606??							STM32L431???
 //								+5V				 ------->			+5V
 //								GND				 ------->			GND
 // 								SER 			 -------> 			PC3
@@ -103,6 +106,7 @@ void SystemClock_Config(void);
 // 								CS_N 			 -------> 			PB12
 // 								RD/SC 	 	     -------> 			PB13
 // 						  	    DB7    		     -------> 			PB14
+
 void AD7606_StartConvst(void)
 {
 	HAL_GPIO_WritePin(CO_A_GPIO_Port, CO_A_Pin, GPIO_PIN_RESET); //	CO_A_L;
@@ -123,7 +127,7 @@ void AD7606_RESET(void)
 void AD7606_Init(void)
 {
 //	MX_SPI2_Init();
-//	GPIO_AD7606_Configuration();    //GPIO配置已经完成, 现在见MX_SPI2_Init();
+//	GPIO_AD7606_Configuration();    //GPIO??????, ???MX_SPI2_Init();
 	HAL_GPIO_WritePin(CO_A_GPIO_Port, CO_A_Pin, GPIO_PIN_SET);   //	CO_A_H;
 	HAL_GPIO_WritePin(CO_B_GPIO_Port, CO_B_Pin, GPIO_PIN_SET);   //	CO_B_H;
 	HAL_Delay(1);
@@ -155,6 +159,7 @@ int main(void)
   int i;
   #define INTERNAL_ADC
 //  #define EXTERNAL_ADC
+//  #define INFERENCE_ON_EDGE
 
   /* USER CODE END 1 */
 
@@ -207,9 +212,11 @@ int main(void)
 // inference on edge device.
     if(count==895)
     {
+#ifdef INFERENCE_ON_EDGE  //inference neural network on powerstrip board, train neural network in cloud/edge server.
 		ei_impulse_result_t result = { 0 };
 		EI_IMPULSE_ERROR res = run_classifier(&signal, &result, true);
 		HAL_Delay(3000);
+#endif
 		count=0;
     }
 
@@ -218,7 +225,7 @@ int main(void)
 	if(count !=895)
 	{
 		HAL_ADC_Start(&hadc1);
-		HAL_ADC_PollForConversion(&hadc1, 30);    //
+		HAL_ADC_PollForConversion(&hadc1, 30);
 		if(HAL_IS_BIT_SET(HAL_ADC_GetState(&hadc1), HAL_ADC_STATE_REG_EOC))
 		{
 			ADCvalue=HAL_ADC_GetValue(&hadc1);
@@ -238,7 +245,7 @@ int main(void)
 		while((HAL_GPIO_ReadPin(GPIOA,BUSY_Pin) == GPIO_PIN_SET))
 			HAL_Delay(10);
 		AD7606_ReadData(DB_data);
-		Voltage = (float)(DB_data[3]*10.0/32768); //2^15=32768, 芯片为16位ADC
+		Voltage = (float)(DB_data[3]*10.0/32768); //2^15=32768, ???16?ADC
 		printf("%f\t\r\n",Voltage);
 		features[count]= Voltage;
 		count++;
