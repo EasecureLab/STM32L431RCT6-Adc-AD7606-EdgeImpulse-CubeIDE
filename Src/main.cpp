@@ -91,43 +91,43 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+// 硬件连接：
+//							AD7606模块							STM32L431核心板
+//								+5V				 ------->			+5V
+//								GND				 ------->			GND
+// 								SER 			 -------> 			PC3
+// 								CO-A 			 -------> 			PC5
+// 								CO-B 			 -------> 			PC6
+// 								REST 			 -------> 			PC7
+// 								BUSY 			 -------> 			PA1
+// 								CS_N 			 -------> 			PB12
+// 								RD/SC 	 	     -------> 			PB13
+// 						  	    DB7    		     -------> 			PB14
 void AD7606_StartConvst(void)
 {
 	HAL_GPIO_WritePin(CO_A_GPIO_Port, CO_A_Pin, GPIO_PIN_RESET); //	CO_A_L;
 	HAL_GPIO_WritePin(CO_B_GPIO_Port, CO_B_Pin, GPIO_PIN_RESET); //	CO_B_L;
 	HAL_Delay(1);
-//	for(int i = 20; i > 0; i--){
-//		__NOP();//1000/168 ns = 5.85ns
-//	}
-	HAL_GPIO_WritePin(CO_A_GPIO_Port, CO_A_Pin, GPIO_PIN_SET); //	CO_A_H;
-	HAL_GPIO_WritePin(CO_B_GPIO_Port, CO_B_Pin, GPIO_PIN_SET); //	CO_B_H;
+	HAL_GPIO_WritePin(CO_A_GPIO_Port, CO_A_Pin, GPIO_PIN_SET);   //	CO_A_H;
+	HAL_GPIO_WritePin(CO_B_GPIO_Port, CO_B_Pin, GPIO_PIN_SET);   //	CO_B_H;
 	HAL_Delay(1);
-//	for(int i = 20; i > 0; i--){
-//		__NOP();//1000/168 ns = 5.85ns
-//	}
 }
 void AD7606_RESET(void)
 {
 	HAL_GPIO_WritePin(REST_GPIO_Port, REST_Pin, GPIO_PIN_RESET); //REST_L;
 	HAL_Delay(1);
-//	for(int i = 20; i > 0; i--){
-//		__NOP();//1000/168 ns = 5.85ns
-//	}
-	HAL_GPIO_WritePin(REST_GPIO_Port, REST_Pin, GPIO_PIN_SET); //REST_H;
+	HAL_GPIO_WritePin(REST_GPIO_Port, REST_Pin, GPIO_PIN_SET);   //REST_H;
 	HAL_Delay(1);
-//	for(int i = 20; i > 0; i--){
-//		__NOP();//1000/168 ns = 5.85ns
-//	}
 	HAL_GPIO_WritePin(REST_GPIO_Port, REST_Pin, GPIO_PIN_RESET); //REST_L;
 }
 void AD7606_Init(void)
 {
 //	MX_SPI2_Init();
-//	GPIO_AD7606_Configuration();
-	HAL_GPIO_WritePin(CO_A_GPIO_Port, CO_A_Pin, GPIO_PIN_SET); //	CO_A_H;
-	HAL_GPIO_WritePin(CO_B_GPIO_Port, CO_B_Pin, GPIO_PIN_SET); //	CO_B_H;
+//	GPIO_AD7606_Configuration();    //GPIO配置已经完成, 现在见MX_SPI2_Init();
+	HAL_GPIO_WritePin(CO_A_GPIO_Port, CO_A_Pin, GPIO_PIN_SET);   //	CO_A_H;
+	HAL_GPIO_WritePin(CO_B_GPIO_Port, CO_B_Pin, GPIO_PIN_SET);   //	CO_B_H;
 	HAL_Delay(1);
-	HAL_GPIO_WritePin(SER_GPIO_Port, SER_Pin, GPIO_PIN_SET); //SER_H;
+	HAL_GPIO_WritePin(SER_GPIO_Port, SER_Pin, GPIO_PIN_SET);     // SER_H;
 
 	AD7606_RESET();
 	HAL_Delay(1);
@@ -151,6 +151,11 @@ int main(void)
   float Rest;
   uint8_t dis_buf[40];
   uint16_t DB_data[8] = {0};
+  int count=895;
+  int i;
+  #define INTERNAL_ADC
+//  #define EXTERNAL_ADC
+
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -178,13 +183,17 @@ int main(void)
   MX_CRC_Init();
   MX_SPI2_Init();
   /* USER CODE BEGIN 2 */
+// internal adc module init and start
   HAL_ADCEx_Calibration_Start(&hadc1,ADC_SINGLE_ENDED);
-  printf("Hello Wang.Wei\r\n");
-
-  int count=895;
-  int i;
-
+// external adc chip   init and start
   AD7606_Init();
+// compile information and welcome!!
+  printf("Hello Wang.Wei\r\n");
+  printf("%d\n", __LINE__);
+  printf("%s\n", __TIME__);
+  printf("%s\n", __DATE__);
+  printf("%s\n", __FILE__);
+  HAL_Delay(3000);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -195,40 +204,46 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-// internal adc
+// inference on edge device.
     if(count==895)
     {
-    	// inference on edge
 		ei_impulse_result_t result = { 0 };
 		EI_IMPULSE_ERROR res = run_classifier(&signal, &result, true);
 		HAL_Delay(3000);
 		count=0;
     }
-    if(count !=895)
-    {
+
+    // internal adc module, data acquisition function.
+#ifdef INTERNAL_ADC
+	if(count !=895)
+	{
 		HAL_ADC_Start(&hadc1);
 		HAL_ADC_PollForConversion(&hadc1, 30);    //
 		if(HAL_IS_BIT_SET(HAL_ADC_GetState(&hadc1), HAL_ADC_STATE_REG_EOC))
 		{
 			ADCvalue=HAL_ADC_GetValue(&hadc1);
 			Voltage=ADCvalue*3.3/4096;   //2^12=4096
-			Rest = Voltage*10/(3.3-Voltage);
 			printf("%f\t\r\n",Voltage);
 		}
 		features[count] = Voltage;
 		count++;
-    }
-// external adc chip
-//	AD7606_StartConvst();
-//	while((HAL_GPIO_ReadPin(GPIOA,BUSY_Pin) == GPIO_PIN_SET))	//
-//		HAL_Delay(10);
-//	AD7606_ReadData(DB_data);
-//	for(i=0;i<8;i++)
-//	{
-//		sprintf((char*)dis_buf,"CH%1d:%8.1f mv  0x%04x %6d\r\n", i+1, (float)(DB_data[i]*10000.0/32768), (uint16_t)(DB_data[i]^0x8000), (uint16_t)(DB_data[i]^0x8000));
-//	    printf("%s",dis_buf);
-//	}
-//	HAL_Delay(1000);
+	}
+#endif
+
+// external adc chip, data acquisition function.
+#ifdef  EXTERNAL_ADC
+	if(count !=895)
+	{
+		AD7606_StartConvst();
+		while((HAL_GPIO_ReadPin(GPIOA,BUSY_Pin) == GPIO_PIN_SET))
+			HAL_Delay(10);
+		AD7606_ReadData(DB_data);
+		Voltage = (float)(DB_data[3]*10.0/32768); //2^15=32768, 芯片为16位ADC
+		printf("%f\t\r\n",Voltage);
+		features[count]= Voltage;
+		count++;
+	}
+#endif
 
   }
   /* USER CODE END 3 */
